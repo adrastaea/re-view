@@ -31,7 +31,7 @@ const ReviewsColumn: React.FC = () => {
   return (
     <div>
       {reviews.map((review) => (
-        <ReviewCard key={review.id} review={review} />
+        <ReviewCard key={review.Id} review={review} />
       ))}
     </div>
   );
