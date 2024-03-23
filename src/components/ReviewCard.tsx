@@ -8,7 +8,17 @@ const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
       <div className="justify-left flex flex-row gap-2">
         <h3 className="text-xl font-bold text-gray-900">{review.Author}</h3>
         <p className="flex-shrink">{"⭐️".repeat(review.Score)}</p>
-        <p className="flex-grow text-right">{review.Date}</p>
+        <p className="flex-grow text-right">
+          {new Date(review.Date).toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            hour12: true,
+          })}
+        </p>
       </div>
       <p>{review.Content}</p>
     </div>

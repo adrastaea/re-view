@@ -7,6 +7,6 @@ export interface Review {
   Id: string;
   Author: string;
   Content: string;
-  Score: string;
-  Date: string;
+  Score: number;
+  Date: Date;
 }
