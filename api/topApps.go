@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -30,8 +29,6 @@ func HandlerTopApps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
-
-	log.Printf("Fetching top apps from %s", TOP_APP_URL)
 
 	// decode the response body into a AppStoreFeed struct
 	var feed AppFeedContainer

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -60,13 +59,11 @@ func parseReviewsResp(feed FeedContainer, appId string, saveFile string, timePer
 		if now.Sub(timestamp) <= timePeriod {
 			review, err := convertEntryToReview(entry)
 			if err != nil {
-				log.Printf("Failed to convert entry to review: %v", err)
 				continue
 			}
 			// Append the review to the return list and add to persistent storage
 			reviews.Reviews = append(reviews.Reviews, review)
 			if _, err := file.Write([]byte(appId + "," + review.Id + "," + review.Date + "," + review.Author + "," + review.Score + "," + strings.ReplaceAll(review.Content, "\n", "\\n") + "\n")); err != nil {
-				log.Printf("Failed to write entry to file: %v", err)
 				continue
 			}
 		}
@@ -85,7 +82,6 @@ func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 	}
 
 	url := fmt.Sprintf("https://itunes.apple.com/us/rss/customerreviews/id=%s/sortBy=mostRecent/page=1/json", app_id)
-	log.Printf("Fetching reviews from %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		http.Error(w, "failed fetching reviews", http.StatusInternalServerError)
