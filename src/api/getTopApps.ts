@@ -1,6 +1,6 @@
 import { AppsList } from "../types/Apps";
 
-const REVIEWS_API_URL = "http://localhost:8080/api/top-apps";
+// const REVIEWS_API_URL = "http://localhost:8080/api/topApps";
 
 /**
  * Fetches reviews from the server.
@@ -9,7 +9,7 @@ const REVIEWS_API_URL = "http://localhost:8080/api/top-apps";
  */
 export async function getTopApps(): Promise<AppsList> {
   try {
-    const response = await fetch(REVIEWS_API_URL);
+    const response = await fetch('api/topApps');
     if (!response.ok) {
       throw new Error(`Failed to fetch data: ${response.status} (${response.statusText})`);
     }
