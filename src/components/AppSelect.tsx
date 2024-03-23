@@ -15,6 +15,7 @@ const AppSelect: React.FC<AppSelectProps> = ({ onAppSelect }) => {
       try {
         const response = await getTopApps();
         const data: App[] = [];
+        // hardcode the test app
         data.push({
           Id: "595068606",
           Name: "Test App",
@@ -22,6 +23,7 @@ const AppSelect: React.FC<AppSelectProps> = ({ onAppSelect }) => {
         });
         // merge the data with the response
         data.push(...response.Apps);
+        // set the list of apps and select the first one
         setApps(data);
         onAppSelect(data[0]);
       } catch (error) {

@@ -1,5 +1,3 @@
-import { Reviews } from './Reviews';
-
 export interface Apps {
     Apps: App[];
     }

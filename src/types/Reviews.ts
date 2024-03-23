@@ -1,4 +1,3 @@
-// app/types/Reviews.ts
 export interface Reviews {
   Reviews: Review[];
 }

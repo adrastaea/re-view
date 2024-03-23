@@ -1,4 +1,3 @@
-// app/reviews/ReviewCard.tsx
 import React from "react";
 import { Review } from "../types/Reviews";
 

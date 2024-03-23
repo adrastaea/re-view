@@ -45,6 +45,7 @@ const ReviewsColumn: React.FC<{ selectedApp: App | null }> = ({
         Loading...
       </div>
     );
+
   if (error) return <div className="flex p-8 text-3xl">Error: {error}</div>;
 
   if (!reviews)

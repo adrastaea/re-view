@@ -4,7 +4,7 @@ const REVIEWS_API_URL = "http://localhost:8080/api/top-apps";
 
 /**
  * Fetches reviews from the server.
- * @returns A promise that resolves to an array of Review objects.
+ * @returns A promise that resolves to an array of App objects.
  * @throws {Error} When the fetch operation fails or returns a non-ok status.
  */
 export async function getTopApps(): Promise<Apps> {
