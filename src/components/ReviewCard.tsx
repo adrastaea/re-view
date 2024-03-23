@@ -5,22 +5,23 @@ import { Review } from "../types/Reviews";
 const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
   return (
     <div className="rounded-lg border-2 p-4 shadow-sm hover:shadow-md">
-      <div className="justify-left flex flex-row gap-2">
-        <h3 className="text-xl font-bold text-gray-900">{review.Author}</h3>
-        <p className="flex-shrink">{"⭐️".repeat(review.Score)}</p>
-        <p className="flex-grow text-right">
+      <div className="justify-left flex flex-row items-center gap-2">
+        <div className="flex-shrink-0 text-xl font-bold text-gray-800">
+          {review.Author}
+        </div>
+        <div className="flex-grow">{"⭐️".repeat(review.Score)}</div>
+        <div className="flex-grow text-right text-sm font-light">
           {new Date(review.Date).toLocaleString("en-US", {
-            month: "long",
+            month: "short",
             day: "numeric",
             year: "numeric",
             hour: "numeric",
             minute: "numeric",
-            second: "numeric",
             hour12: true,
           })}
-        </p>
+        </div>
       </div>
-      <p>{review.Content}</p>
+      <div className="pt-2">{review.Content}</div>
     </div>
   );
 };
