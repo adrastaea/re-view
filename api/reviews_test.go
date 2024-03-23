@@ -8,14 +8,11 @@ import (
 	"testing"
 )
 
-func TestHandleReviews(t *testing.T) {
+func TestHandlerReviews(t *testing.T) {
 	req, err := http.NewRequest("GET", "/api/reviews?id=1666653815", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// print the req
-	fmt.Print(req)
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(HandlerReviews)
@@ -23,25 +20,26 @@ func TestHandleReviews(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		t.Errorf("HandlerReviews returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	var result FeedContainer
-
+	// Assuming ReviewsResp is the expected type
+	var result ReviewsResp
 	err = json.Unmarshal(rr.Body.Bytes(), &result)
-	fmt.Print(result)
-
 	if err != nil {
 		if syntaxErr, ok := err.(*json.SyntaxError); ok {
 			t.Errorf("JSON syntax error at byte offset %d: %s", syntaxErr.Offset, err)
 		} else {
-			t.Errorf("The handler returned non-JSON body: %v", err)
+			t.Errorf("HandlerReviews returned a non-JSON body: %v", err)
 		}
 	}
+
+	fmt.Printf("Reviews: %v\n", result.Reviews)
+
 }
 
-func TestHandleTopApps(t *testing.T) {
-	req, err := http.NewRequest("GET", "/api/topApps", nil)
+func TestHandlerTopApps(t *testing.T) {
+	req, err := http.NewRequest("GET", "/api/top-apps", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,19 +50,24 @@ func TestHandleTopApps(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		t.Errorf("HandlerTopApps returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	var result AppFeedContainer
-
+	var result AppsResp
 	err = json.Unmarshal(rr.Body.Bytes(), &result)
-	fmt.Print(result)
-
 	if err != nil {
 		if syntaxErr, ok := err.(*json.SyntaxError); ok {
 			t.Errorf("JSON syntax error at byte offset %d: %s", syntaxErr.Offset, err)
 		} else {
-			t.Errorf("The handler returned non-JSON body: %v", err)
+			t.Errorf("HandlerTopApps returned a non-JSON body: %v", err)
 		}
+	}
+
+	fmt.Printf("Top Apps: %v\n", result.Apps)
+
+	// assert that the response body is a JSON array
+	if len(result.Apps) == 0 {
+		t.Errorf("HandlerTopApps returned an empty list of apps")
+
 	}
 }
