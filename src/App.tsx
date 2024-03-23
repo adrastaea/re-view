@@ -1,5 +1,4 @@
 import ReviewsColumn from "./components/ReviewsColumn";
-import "./App.css";
 
 export interface Review {
   id: number;
@@ -11,12 +10,10 @@ export interface Review {
 
 function App() {
   return (
-    <>
-      <div>
-        <h1>Reviews</h1>
-        <ReviewsColumn />
-      </div>
-    </>
+    <div className="justify-top flex min-h-screen flex-col items-center">
+      <h1 className="pt-12 text-5xl font-bold text-[#6a7edc]">Re:View</h1>
+      <ReviewsColumn />
+    </div>
   );
 }
 
