@@ -9,6 +9,7 @@ import { ReviewsList } from "../types/Reviews";
  */
 export async function getReviews(id: string): Promise<ReviewsList> {
   try {
+    console.log("getReviews: ", id);
     const url = `api/reviews`;
     console.log(url);
     const response = await fetch(url);
