@@ -1,7 +1,7 @@
 import React from "react";
-import { Review } from "../types/Reviews";
+import { ReviewItem } from "../types/Reviews";
 
-const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
+const ReviewCard: React.FC<{ review: ReviewItem }> = ({ review }) => {
   return (
     <div className="rounded-lg border-2 p-4 shadow-sm hover:shadow-md">
       <div className="justify-left flex flex-row items-center gap-2">

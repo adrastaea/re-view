@@ -1,8 +1,8 @@
-export interface Reviews {
-  Reviews: Review[];
+export interface ReviewsList {
+  Reviews: ReviewItem[];
 }
 
-export interface Review {
+export interface ReviewItem {
   Id: string;
   Author: string;
   Content: string;

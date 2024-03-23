@@ -1,8 +1,8 @@
-export interface Apps {
-    Apps: App[];
+export interface AppsList {
+    Apps: AppsListItem[];
     }
 
-export interface App {
+export interface AppsListItem {
     Id: string;
     Name: string;
     IconUrl: string;

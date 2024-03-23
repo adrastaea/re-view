@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { getReviews } from "../api/getReviews";
-import { Review } from "../types/Reviews";
+import { ReviewItem } from "../types/Reviews";
 import ReviewCard from "./ReviewCard";
 import reactLogo from "../assets/react.svg";
-import { App } from "../types/Apps";
+import { AppsListItem } from "../types/Apps";
 
-const ReviewsColumn: React.FC<{ selectedApp: App | null }> = ({
+const ReviewsColumn: React.FC<{ selectedApp: AppsListItem | null }> = ({
   selectedApp,
 }) => {
-  const [reviews, setReviews] = useState<Review[] | null>(null);
+  const [reviews, setReviews] = useState<ReviewItem[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

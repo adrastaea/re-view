@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReviewsColumn from "./components/ReviewsColumn";
 import AppSelect from "./components/AppSelect";
-import { App } from "./types/Apps";
+import { AppsListItem } from "./types/Apps";
 
 export interface Review {
   id: number;
@@ -12,10 +12,10 @@ export interface Review {
 }
 
 const App: React.FC = () => {
-  const [selectedApp, setSelectedApp] = useState<App | null>(null);
+  const [selectedApp, setSelectedApp] = useState<AppsListItem | null>(null);
 
-  const handleAppSelection = (app: App) => {
-    setSelectedApp(app);
+  const handleAppSelection = (appItem: AppsListItem) => {
+    setSelectedApp(appItem);
   };
 
   return (
