@@ -1,6 +1,6 @@
 import { ReviewsList } from "../types/Reviews";
 
-const REVIEWS_API_URL = "http://localhost:8080/api/reviews";
+// const REVIEWS_API_URL = "http://localhost:8080/api/reviews";
 
 /**
  * Fetches reviews from the server.
@@ -9,9 +9,10 @@ const REVIEWS_API_URL = "http://localhost:8080/api/reviews";
  */
 export async function getReviews(id: string): Promise<ReviewsList> {
   try {
-    const response = await fetch(`${REVIEWS_API_URL}?id=${id}`);
+    const url = `api/reviews?id=${id}`;
+    const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`Failed to fetch data: ${response.status} (${response.statusText})`);
+      throw new Error(`Failed to fetch data: ${response.status} (${response.statusText}) (${response.text()}`);
     }
     const data: ReviewsList = await response.json();
     return data;
