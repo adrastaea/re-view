@@ -1,11 +1,16 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 func convertEntryToReview(entry Entry) (ReviewData, error) {
@@ -45,18 +50,75 @@ func parseReviewsResp(feed FeedContainer, timePeriod time.Duration) (ReviewsResp
 	return reviews, nil
 }
 
+func addReviewsToDB(appId string, reviews []ReviewData) error {
+	databaseURL := os.Getenv("POSTGRES_URL")
+	if databaseURL == "" {
+		return fmt.Errorf("database URL is not set")
+	}
+
+	db, err := sql.Open("postgres", databaseURL)
+	if err != nil {
+		return fmt.Errorf("unable to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Ensure the reviews table exists
+	createTableSQL := `
+CREATE TABLE IF NOT EXISTS reviews (
+    id SERIAL PRIMARY KEY,
+    review_id TEXT NOT NULL,
+    app_id TEXT NOT NULL,
+    date TEXT,
+    author TEXT,
+    score TEXT,
+    content TEXT,
+    UNIQUE (review_id, app_id)
+);
+;`
+	_, err = db.Exec(createTableSQL)
+	if err != nil {
+		return fmt.Errorf("failed to ensure reviews table exists: %v", err)
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("unable to begin transaction: %v", err)
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO reviews (review_id, app_id, date, author, score, content) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (review_id, app_id) DO NOTHING;")
+	if err != nil {
+		tx.Rollback() // Rollback in case of statement preparation errors
+		return fmt.Errorf("failed to prepare statement: %v", err)
+	}
+	defer stmt.Close()
+
+	for _, review := range reviews {
+		_, err := stmt.Exec(review.Id, appId, review.Date, review.Author, review.Score, review.Content)
+		if err != nil {
+			tx.Rollback() // Rollback the transaction in case of execution errors
+			return fmt.Errorf("failed to insert review: %v", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("transaction commit failed: %v", err)
+	}
+
+	return nil
+}
+
 // HandlerReviews serves as the HTTP handler for fetching and returning app reviews.
 func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 
-	// add app_id as a query parameter
+	// add appId as a query parameter
 	// e.x. http://localhost:8080/api/reviews?id=123456
-	app_id := r.URL.Query().Get("id")
-	if app_id == "" {
+	appId := r.URL.Query().Get("id")
+	if appId == "" {
 		http.Error(w, "Missing id query parameter", http.StatusBadRequest)
 		return
 	}
 
-	url := fmt.Sprintf("https://itunes.apple.com/us/rss/customerreviews/id=%s/sortBy=mostRecent/page=1/json", app_id)
+	url := fmt.Sprintf("https://itunes.apple.com/us/rss/customerreviews/id=%s/sortBy=mostRecent/page=1/json", appId)
 	resp, err := http.Get(url)
 	if err != nil {
 		http.Error(w, "failed fetching reviews", http.StatusInternalServerError)
@@ -75,6 +137,10 @@ func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "failed parsing resp from feed", http.StatusInternalServerError)
 		return
+	}
+
+	if err := addReviewsToDB(appId, reviews.Reviews); err != nil {
+		log.Print(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
