@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 )
 
@@ -24,53 +22,30 @@ func convertEntryToReview(entry Entry) (ReviewData, error) {
 	}, nil
 }
 
-// parseReviewsResp parses the response within a given timePeriod from the iTunes API
-// and returns a ReviewsResp struct containing the reviews from the feed.
-// It also saves the reviews to a file.
-func parseReviewsResp(feed FeedContainer, appId string, saveFile string, timePeriod time.Duration) (ReviewsResp, error) {
-	// Open a file for writing
-	file, err := os.OpenFile(saveFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return ReviewsResp{}, err
-	}
-	defer file.Close()
-
-	// Check if file is empty
-	fi, err := file.Stat()
-	if err != nil {
-		return ReviewsResp{}, err
-	}
-	if fi.Size() == 0 {
-		// Write the header
-		if _, err := file.Write([]byte("AppId,ReviewId,Date,Author,Score,Content\n")); err != nil {
-			return ReviewsResp{}, err
-		}
-	}
-
-	now := time.Now()
+// parseReviewsResp parses the response from the iTunes API and returns a ReviewsResp struct.
+// It also saves the reviews to a file if within the specified time period.
+func parseReviewsResp(feed FeedContainer, timePeriod time.Duration) (ReviewsResp, error) {
 	var reviews ReviewsResp
-
-	// Put all entries in the feed into a ReviewContainer
+	now := time.Now()
 	for _, entry := range feed.Feed.Entry {
-		timestamp, err := time.Parse(time.RFC3339, entry.Updated.Label)
+		reviewTime, err := time.Parse(time.RFC3339, entry.Updated.Label)
 		if err != nil {
-			return ReviewsResp{}, err
+			continue // Skip entries with invalid dates
 		}
-		if now.Sub(timestamp) <= timePeriod {
+		if now.Sub(reviewTime) <= timePeriod {
 			review, err := convertEntryToReview(entry)
 			if err != nil {
-				continue
+				continue // Skip entries with missing required fields
 			}
-			// Append the review to the return list and add to persistent storage
+
+			// Append the review to the response and write it to the file
 			reviews.Reviews = append(reviews.Reviews, review)
-			if _, err := file.Write([]byte(appId + "," + review.Id + "," + review.Date + "," + review.Author + "," + review.Score + "," + strings.ReplaceAll(review.Content, "\n", "\\n") + "\n")); err != nil {
-				continue
-			}
 		}
 	}
 	return reviews, nil
 }
 
+// HandlerReviews serves as the HTTP handler for fetching and returning app reviews.
 func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 
 	// add app_id as a query parameter
@@ -96,18 +71,13 @@ func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reviews, err := parseReviewsResp(feed, app_id, "reviews.txt", 2*24*time.Hour)
+	reviews, err := parseReviewsResp(feed, 2*24*time.Hour)
 	if err != nil {
 		http.Error(w, "failed parsing resp from feed", http.StatusInternalServerError)
 		return
 	}
 
-	// encode the Feed struct into a JSON response
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(reviews); err != nil {
 		http.Error(w, "failed encoding json", http.StatusInternalServerError)
 		return
