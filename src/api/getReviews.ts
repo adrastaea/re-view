@@ -12,7 +12,7 @@ export async function getReviews(id: string): Promise<ReviewsList> {
     const url = `api/reviews?id=${id}`;
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`Failed to fetch data: ${response.status} (${response.statusText}) (${response.text}`);
+      throw new Error(`Failed to fetch data: ${response.status} (${response.statusText}) (${response.text()}`);
     }
     const data: ReviewsList = await response.json();
     return data;
