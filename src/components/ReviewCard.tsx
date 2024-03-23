@@ -6,7 +6,9 @@ const ReviewCard: React.FC<{ review: ReviewItem }> = ({ review }) => {
     <div className="rounded-lg border-2 p-4 shadow-sm hover:shadow-md">
       <div className="justify-left flex flex-row flex-wrap items-center gap-2">
         <div className="flex-shrink-0 text-lg font-bold text-gray-800 md:text-2xl">
-          {review.Author}
+          {review.Author.length > 16
+            ? `${review.Author.substring(0, 16)}...`
+            : review.Author}
         </div>
         <div className="flex-grow text-sm md:text-lg">
           {"⭐️".repeat(review.Score)}
