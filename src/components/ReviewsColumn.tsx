@@ -26,7 +26,7 @@ const ReviewsColumn: React.FC<{ selectedApp: AppsListItem | null }> = ({
           setLoading(false);
         }
       } else {
-        setLoading(false);
+        setLoading(true);
         setReviews([]);
       }
     };
