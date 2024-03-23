@@ -3,27 +3,36 @@ import { getReviews } from "../api/getReviews";
 import { Review } from "../types/Reviews";
 import ReviewCard from "./ReviewCard";
 import reactLogo from "../assets/react.svg";
+import { App } from "../types/Apps";
 
-const ReviewsColumn: React.FC = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+const ReviewsColumn: React.FC<{ selectedApp: App | null }> = ({
+  selectedApp,
+}) => {
+  const [reviews, setReviews] = useState<Review[] | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchReviews = async () => {
-      try {
-        setLoading(true);
-        const response = await getReviews();
-        setReviews(response.Reviews);
+      console.log("fetchReviews: ", selectedApp);
+      if (selectedApp !== null) {
+        try {
+          setLoading(true);
+          const response = await getReviews(selectedApp.Id);
+          setReviews(response.Reviews);
+          setLoading(false);
+        } catch (error: any) {
+          setError("Failed to load reviews: " + error.message);
+          setLoading(false);
+        }
+      } else {
         setLoading(false);
-      } catch (error) {
-        setError("Failed to load reviews.");
-        setLoading(false);
+        setReviews([]);
       }
     };
 
     fetchReviews();
-  }, []);
+  }, [selectedApp]);
 
   if (loading)
     return (
@@ -38,7 +47,10 @@ const ReviewsColumn: React.FC = () => {
     );
   if (error) return <div className="flex p-8 text-3xl">Error: {error}</div>;
 
-  console.log(reviews);
+  if (!reviews)
+    return (
+      <div className="flex p-8 text-3xl">No reviews in previous 48 hours</div>
+    );
   return (
     <div className="container flex flex-col gap-4 p-4">
       {reviews.map((review) => (

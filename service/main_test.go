@@ -9,7 +9,7 @@ import (
 )
 
 func TestHandleReviews(t *testing.T) {
-	req, err := http.NewRequest("GET", "/api/reviews", nil)
+	req, err := http.NewRequest("GET", "/api/reviews?id=595068606", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

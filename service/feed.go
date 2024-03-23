@@ -1,5 +1,22 @@
 package main
 
+// Structs returned by the /api/reviews endpoint
+type ReviewsResp struct {
+	Reviews []ReviewData
+}
+
+type ReviewData struct {
+	Id      string
+	Date    string
+	Author  string
+	Score   string
+	Content string
+}
+
+// Structs for the JSON response from the iTunes API
+type FeedContainer struct {
+	Feed Feed `json:"feed"`
+}
 type Feed struct {
 	Author  Author  `json:"author"`
 	Entry   []Entry `json:"entry"`
@@ -57,8 +74,4 @@ type EntryLink struct {
 
 type ContentType struct {
 	Attributes Attributes `json:"attributes"`
-}
-
-type FeedContainer struct {
-	Feed Feed `json:"feed"`
 }

@@ -1,4 +1,7 @@
+import { useState } from "react";
 import ReviewsColumn from "./components/ReviewsColumn";
+import AppSelect from "./components/AppSelect";
+import { App } from "./types/Apps";
 
 export interface Review {
   id: number;
@@ -8,13 +11,23 @@ export interface Review {
   date: string;
 }
 
-function App() {
+const App: React.FC = () => {
+  const [selectedApp, setSelectedApp] = useState<App | null>(null);
+
+  const handleAppSelection = (app: App) => {
+    setSelectedApp(app);
+  };
+
   return (
-    <div className="justify-top flex min-h-screen flex-col items-center">
+    <div className="justify-top flex min-h-screen flex-col items-center gap-4">
       <h1 className="pt-12 text-5xl font-bold text-[#6a7edc]">Re:View</h1>
-      <ReviewsColumn />
+      <h2 className="text-xl font-light">
+        What the people are saying about the top apps on Apple
+      </h2>
+      <AppSelect onAppSelect={handleAppSelection} />
+      <ReviewsColumn selectedApp={selectedApp} />
     </div>
   );
-}
+};
 
 export default App;
