@@ -88,7 +88,7 @@ func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Fetching reviews from %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed fetching reviews", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
@@ -96,13 +96,13 @@ func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 	// decode the response body into a Feed struct
 	var feed FeedContainer
 	if err := json.NewDecoder(resp.Body).Decode(&feed); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed decoding response body", http.StatusInternalServerError)
 		return
 	}
 
 	reviews, err := parseReviewsResp(feed, app_id, "reviews.txt", 2*24*time.Hour)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed parsing resp from feed", http.StatusInternalServerError)
 		return
 	}
 
@@ -113,7 +113,7 @@ func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(reviews); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed encoding json", http.StatusInternalServerError)
 		return
 	}
 }
