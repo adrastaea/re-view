@@ -9,12 +9,10 @@ import { ReviewsList } from "../types/Reviews";
  */
 export async function getReviews(id: string): Promise<ReviewsList> {
   try {
-    console.log("getReviews: ", id);
-    const url = `api/reviews`;
-    console.log(url);
+    const url = `api/reviews?id=${id}`;
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`Failed to fetch data: ${response.status} (${response.statusText})`);
+      throw new Error(`Failed to fetch data: ${response.status} (${response.statusText}) (${response.text}`);
     }
     const data: ReviewsList = await response.json();
     return data;
