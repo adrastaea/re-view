@@ -74,23 +74,7 @@ func parseReviewsResp(feed FeedContainer, appId string, saveFile string, timePer
 	return reviews, nil
 }
 
-func convertResultsToAppData(app AppInfo) AppData {
-	return AppData{
-		Id:      app.ID,
-		Name:    app.Name,
-		IconUrl: app.ArtworkUrl100,
-	}
-}
-
-func convertAppFeedContainertoAppsResp(feed AppFeedContainer) AppsResp {
-	var apps AppsResp
-	for _, app := range feed.Feed.Results {
-		apps.Apps = append(apps.Apps, convertResultsToAppData(app))
-	}
-	return apps
-}
-
-func handleReviews(w http.ResponseWriter, r *http.Request) {
+func HandlerReviews(w http.ResponseWriter, r *http.Request) {
 
 	// add app_id as a query parameter
 	// e.x. http://localhost:8080/api/reviews?id=123456
@@ -134,61 +118,78 @@ func handleReviews(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleTopApps(w http.ResponseWriter, r *http.Request) {
-	TOP_APP_URL := "https://rss.applemarketingtools.com/api/v2/us/apps/top-free/10/apps.json"
-	resp, err := http.Get(TOP_APP_URL)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
-
-	log.Printf("Fetching top apps from %s", TOP_APP_URL)
-
-	// decode the response body into a AppStoreFeed struct
-	var feed AppFeedContainer
-	if err := json.NewDecoder(resp.Body).Decode(&feed); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	apps := convertAppFeedContainertoAppsResp(feed)
-	// encode the AppsResp struct into a JSON response
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(apps); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+// Structs returned by the /api/reviews endpoint
+type ReviewsResp struct {
+	Reviews []ReviewData
 }
 
-func main() {
-	// Open a file for logging
-	logFile, err := os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// defer logFile.Close()
-	log.SetOutput(logFile)
+type ReviewData struct {
+	Id      string
+	Date    string
+	Author  string
+	Score   string
+	Content string
+}
 
-	// Set up routers
-	http.HandleFunc("/api/reviews", handleReviews)
-	http.HandleFunc("/api/top-apps", handleTopApps)
+// Structs for the JSON response from the iTunes API
+type FeedContainer struct {
+	Feed Feed `json:"feed"`
+}
+type Feed struct {
+	Author  Author  `json:"author"`
+	Entry   []Entry `json:"entry"`
+	Updated Label   `json:"updated"`
+	Rights  Label   `json:"rights"`
+	Title   Label   `json:"title"`
+	Icon    Label   `json:"icon"`
+	Link    []Link  `json:"link"`
+	Id      Label   `json:"id"`
+}
 
-	// CORS configuration for development purposes
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	})
+type Author struct {
+	Name Label `json:"name"`
+	Uri  Label `json:"uri"`
+}
 
-	println("Server is running at http://localhost:8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Printf("Failed to start server: %s", err)
-		panic(err)
-	}
-	log.Println("Server is running at http://localhost:8080")
+type Entry struct {
+	Author        Author      `json:"author"`
+	Updated       Label       `json:"updated"`
+	ImRating      Label       `json:"im:rating"`
+	ImVersion     Label       `json:"im:version"`
+	Id            Label       `json:"id"`
+	Title         Label       `json:"title"`
+	Content       Content     `json:"content"`
+	Link          EntryLink   `json:"link"`
+	ImVoteSum     Label       `json:"im:voteSum"`
+	ImContentType ContentType `json:"im:contentType"`
+	ImVoteCount   Label       `json:"im:voteCount"`
+}
+
+type Label struct {
+	Label string `json:"label"`
+}
+
+type Content struct {
+	Label      string     `json:"label"`
+	Attributes Attributes `json:"attributes"`
+}
+
+type Attributes struct {
+	Type  string `json:"type,omitempty"`
+	Rel   string `json:"rel,omitempty"`
+	Href  string `json:"href,omitempty"`
+	Term  string `json:"term,omitempty"`
+	Label string `json:"label,omitempty"`
+}
+
+type Link struct {
+	Attributes Attributes `json:"attributes"`
+}
+
+type EntryLink struct {
+	Attributes Attributes `json:"attributes"`
+}
+
+type ContentType struct {
+	Attributes Attributes `json:"attributes"`
 }
