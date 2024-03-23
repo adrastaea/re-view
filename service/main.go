@@ -28,7 +28,7 @@ func convertEntryToReview(entry Entry) (ReviewData, error) {
 // parseReviewsResp parses the response within a given timePeriod from the iTunes API
 // and returns a ReviewsResp struct containing the reviews from the feed.
 // It also saves the reviews to a file.
-func parseReviewsResp(feed FeedContainer, saveFile string, timePeriod time.Duration) (ReviewsResp, error) {
+func parseReviewsResp(feed FeedContainer, appId string, saveFile string, timePeriod time.Duration) (ReviewsResp, error) {
 	// Open a file for writing
 	file, err := os.OpenFile(saveFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -43,7 +43,7 @@ func parseReviewsResp(feed FeedContainer, saveFile string, timePeriod time.Durat
 	}
 	if fi.Size() == 0 {
 		// Write the header
-		if _, err := file.Write([]byte("App,Id,Date,Author,Score,Content\n")); err != nil {
+		if _, err := file.Write([]byte("AppId,ReviewId,Date,Author,Score,Content\n")); err != nil {
 			return ReviewsResp{}, err
 		}
 	}
@@ -65,7 +65,7 @@ func parseReviewsResp(feed FeedContainer, saveFile string, timePeriod time.Durat
 			}
 			// Append the review to the return list and add to persistent storage
 			reviews.Reviews = append(reviews.Reviews, review)
-			if _, err := file.Write([]byte(feed.Feed.Title.Label + "," + review.Id + "," + review.Date + "," + review.Author + "," + review.Score + "," + strings.ReplaceAll(review.Content, "\n", "\\n") + "\n")); err != nil {
+			if _, err := file.Write([]byte(appId + "," + review.Id + "," + review.Date + "," + review.Author + "," + review.Score + "," + strings.ReplaceAll(review.Content, "\n", "\\n") + "\n")); err != nil {
 				log.Printf("Failed to write entry to file: %v", err)
 				continue
 			}
@@ -116,7 +116,7 @@ func handleReviews(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reviews, err := parseReviewsResp(feed, "reviews.txt", 2*24*time.Hour)
+	reviews, err := parseReviewsResp(feed, app_id, "reviews.txt", 2*24*time.Hour)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
