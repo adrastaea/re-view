@@ -11,16 +11,16 @@ const ReviewCard: React.FC<{ review: ReviewItem }> = ({ review }) => {
         <div className="flex-grow text-sm md:text-lg">
           {"⭐️".repeat(review.Score)}
         </div>
-        <div className="flex flex-shrink-0 text-left text-sm font-light">
-          {new Date(review.Date).toLocaleString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true,
-          })}
-        </div>
+      </div>
+      <div className="text-left text-sm font-light">
+        {new Date(review.Date).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        })}
       </div>
       <div className="pt-2">{review.Content}</div>
     </div>
