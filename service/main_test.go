@@ -26,7 +26,7 @@ func TestHandleReviews(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	var result map[string]interface{}
+	var result FeedContainer
 
 	err = json.Unmarshal(rr.Body.Bytes(), &result)
 
@@ -54,7 +54,7 @@ func TestHandleTopApps(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	var result map[string]interface{}
+	var result AppFeedContainer
 
 	err = json.Unmarshal(rr.Body.Bytes(), &result)
 
